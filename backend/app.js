@@ -1,11 +1,30 @@
-import express from 'express';
-import { mongoose as _mongoose } from 'node-restful';
+const express = require('express');
+const restful = require('node-restful');
 const server = express();
-const mongoose = _mongoose;
+const mongoose = restful.mongoose;
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
 // Database
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://db/mydb');
+
+// Middlewares
+server.use(bodyParser.urlencoded({extended:true}));
+server.use(bodyParser.json());
+server.use(cors());
+
+// ODM
+const Client = restful.model('Client', {
+  name: { type: String, require: true},
+});
+
+// Rest API
+Client.methods(['get', 'post', 'put', 'delete']);
+Client.updateOptions({new: true, runValidators: true});
+
+//Rotes
+Client.register(server, '/clients');
 
 // Teste
 server.get('/', (req, res, next) => res.send('Backend'));
